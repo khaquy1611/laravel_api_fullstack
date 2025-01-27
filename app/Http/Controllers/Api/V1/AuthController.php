@@ -39,9 +39,8 @@ class AuthController extends Controller
             'password' => $request->string('password')
         ];
         auth('api')->setTTL(2);
-        if (! $token = auth('api')->attempt($credentials)) {
-            $resource = ApiResource::message('Đăng nhập thất bại', Response::HTTP_UNAUTHORIZED);
-            return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+        if (! $token = auth('api')->attempt($credentials)) {    
+            return ApiResource::message('Đăng nhập thất bại', Response::HTTP_UNAUTHORIZED);
         }
         // Tạo bảng refresh token
         // Tạo ra refresh token
@@ -51,11 +50,9 @@ class AuthController extends Controller
             'expires_at' => now()->addDays()
         ];
         if ($this->refreshTokenService->create($refreshTokenPayload)) {
-            $resource = ApiResource::success($this->respondWithToken($token, $refreshTokenPayload), 'Tạo RefreshToken thành công' , Response::HTTP_OK);
-            return response()->json($resource, Response::HTTP_OK);
+            return ApiResource::success($this->respondWithToken($token, $refreshTokenPayload), 'Tạo RefreshToken thành công' , Response::HTTP_OK);
         }
-        $resource = ApiResource::message('Đăng nhập thất bại', Response::HTTP_UNAUTHORIZED);
-        return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+        return ApiResource::message('Đăng nhập thất bại', Response::HTTP_UNAUTHORIZED);
     }
 
 
@@ -71,16 +68,14 @@ class AuthController extends Controller
 
     public function me() {
         $auth = auth('api')->user();
-        $resource = ApiResource::success(['user' => $auth], 'Lấy thông tin người dùng thành công', Response::HTTP_OK);
-        return response()->json($resource, Response::HTTP_OK);
+        return ApiResource::success(['user' => $auth], 'Lấy thông tin người dùng thành công', Response::HTTP_OK);
     }
 
     public function refresh(RefreshTokenRequest $request) {
         $refreshToken = $this->refreshTokenRepository->findRefreshTokenValid($request->input('refresh_token'));
         $user = $this->userRepository->findById($refreshToken->user_id);
         if (!$user) {
-            $resource = ApiResource::message('Không tìm thấy người dùng', Response::HTTP_NOT_FOUND);
-            return response()->json($resource, Response::HTTP_NOT_FOUND);
+            return ApiResource::message('Không tìm thấy người dùng', Response::HTTP_NOT_FOUND);
         }
         // token truy cập cũ không còn hiệu lực
         try {
@@ -88,21 +83,30 @@ class AuthController extends Controller
         }catch(TokenExpiredException $e) {
             
         }catch(TokenInvalidException $e) {
-            $resource = ApiResource::message('Token không hợp lệ', Response::HTTP_UNAUTHORIZED);
-            return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+            return responApiResource::message('Token không hợp lệ', Response::HTTP_UNAUTHORIZED);
         }catch (JWTException $e) {
-            $resource = ApiResource::message('Token không tìm thấy', Response::HTTP_UNAUTHORIZED);
-            return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+            return ApiResource::message('Token không tìm thấy', Response::HTTP_UNAUTHORIZED);
         }
         
         // tạp ra access token mới
         auth('api')->setTTL(60*24);
         $token = auth('api')->login($user);
         if ($token) {
-            $resource = ApiResource::success($this->respondWithToken($token, $refreshToken['refresh_token']), 'Lấy token mới thành công', Response::HTTP_OK);
-            return response()->json($resource, Response::HTTP_OK);
+            return ApiResource::success($this->respondWithToken($token, $refreshToken['refresh_token']), 'Lấy token mới thành công', Response::HTTP_OK);
         }
-        $resource = ApiResource::message('NetWork Error', Response::HTTP_INTERNAL_SERVER_ERROR);
-        return response()->json($resource, Response::HTTP_INTERNAL_SERVER_ERROR);
+        return ApiResource::message('NetWork Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    public function logout() {
+        try {
+            $user = auth('api')->user();
+            $this->refreshTokenRepository->deleteTokenByUserId($user->id);
+            auth('api')->invalidate(true);
+            auth('api')->logout();
+            return ApiResource::message('Đăng xuất thành công', Response::HTTP_OK);
+        
+        }catch (Exception $e) {
+            return ApiResource::message('Đăng xuất thất bại', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

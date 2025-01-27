@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseRequest;
 use App\Repositories\RefreshTokenRepository;
 
-class RefreshTokenRequest extends FormRequest
+class RefreshTokenRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -37,7 +37,7 @@ class RefreshTokenRequest extends FormRequest
             $refreshTokenValue = $this->input('refresh_token');
             $refreshToken = $this->refreshTokenRepository->findRefreshTokenValid($refreshTokenValue);
             if (!$refreshToken) {
-                $validator->errors()->add('refresh_token', 'Refresh token đã hết hạn hoặc không tồn tại');
+                $validator->errors()->add('refresh_token', 'Refresh token đã hết hạn hoặc không tồn tại.');
             }
         });
         

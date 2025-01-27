@@ -22,23 +22,18 @@ class Jwt
     {
         try {
             if (!$request->hasHeader('Authorization')) {
-                $resource = ApiResource::message('Authorization header không được cung cấp', Response::HTTP_BAD_REQUEST);
-                return response()->json($resource, Response::HTTP_NOT_FOUND);
+                return ApiResource::message('Authorization header không được cung cấp', Response::HTTP_BAD_REQUEST);
             }
             $user = JwtAuth::parseToken()->authenticate();
             if (!$user) {
-                $resource = ApiResource::message('Không tìm thấy người dùng', Response::HTTP_NOT_FOUND);
-                return response()->json($resource, Response::HTTP_NOT_FOUND);
+                return ApiResource::message('Không tìm thấy người dùng', Response::HTTP_NOT_FOUND);
             }
         }catch(TokenExpiredException $e) {
-            $resource = ApiResource::message('Token đã hết hạn', Response::HTTP_UNAUTHORIZED);
-            return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+            return ApiResource::message('Token đã hết hạn', Response::HTTP_UNAUTHORIZED);
         }catch(TokenInvalidException $e) {
-            $resource = ApiResource::message('Token không hợp lệ', Response::HTTP_UNAUTHORIZED);
-            return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+            return ApiResource::message('Token không hợp lệ', Response::HTTP_UNAUTHORIZED);
         }catch (JWTException $e) {
-            $resource = ApiResource::message('Token không tìm thấy', Response::HTTP_UNAUTHORIZED);
-            return response()->json($resource, Response::HTTP_UNAUTHORIZED);
+            return ApiResource::message('Token không tìm thấy', Response::HTTP_UNAUTHORIZED);
         }
         return $next($request);
     }

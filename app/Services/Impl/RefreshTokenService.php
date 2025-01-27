@@ -12,7 +12,7 @@ class RefreshTokenService
     {
         $this->refreshTokenRepository = $refreshTokenRepository;
     }
-    public function create($payload) {
+    public function create(array $payload = []) {
         DB::beginTransaction();
         try {
             $refreshToken = $this->refreshTokenRepository->create($payload);

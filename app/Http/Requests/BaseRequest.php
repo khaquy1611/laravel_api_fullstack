@@ -12,7 +12,6 @@ class BaseRequest extends FormRequest
 {
     public function failedValidation(Validator $validator): void
     {
-        $resource = ApiResource::error($validator->errors()->toArray(), 'Validation failed', Response::HTTP_UNPROCESSABLE_ENTITY);
-        throw new HttpResponseException(response()->json($resource, Response::HTTP_UNPROCESSABLE_ENTITY));
+        throw new HttpResponseException(ApiResource::error($validator->errors()->toArray(), 'Validation failed', Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 }

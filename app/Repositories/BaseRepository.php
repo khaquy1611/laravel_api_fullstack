@@ -5,7 +5,7 @@ class BaseRepository
 {
     private $model;
     
-    public function __construct($model)
+    public function __construct(mixed $model = null)
     {
         $this->model = $model;
     }

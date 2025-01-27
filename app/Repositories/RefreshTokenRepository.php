@@ -16,4 +16,8 @@ class RefreshTokenRepository extends BaseRepository
     public function findRefreshTokenValid(string $refreshToken = '') {
         return $this->model->where('refresh_token', $refreshToken)->whereDate('expires_at', '>=', now())->first();
     }
+
+    public function deleteTokenByUserId(int $userId = 0) {
+        return $this->model->where('user_id', $userId)->delete();
+    }
 }
