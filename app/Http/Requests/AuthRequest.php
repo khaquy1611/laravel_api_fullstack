@@ -27,4 +27,13 @@ class AuthRequest extends BaseRequest
         ];
     }
 
+    public function messages() : array {
+        return [
+            'email.required' => 'Bạn phải nhập email (*)',
+            'email.email' => 'Định dạng email không đúng (*)',
+            'password.required' => 'Bạn phải nhập mật khẩu (*)',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự (*)',
+        ];
+    }
+
 }
