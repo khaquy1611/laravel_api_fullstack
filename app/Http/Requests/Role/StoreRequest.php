@@ -26,4 +26,11 @@ class StoreRequest extends BaseRequest
             'publish' => 'gt:0'
         ];
     }
+    
+    public function messages() : array {
+        return [
+            'name.required' => 'Bạn phải nhập tên (*)',
+            'publish.gt' => 'Trường publish phải được chọn (*)',
+        ];
+    }
 }

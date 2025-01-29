@@ -6,6 +6,7 @@ use App\Http\Resources\RoleResource;
 use App\Http\Controllers\Api\V1\BaseController;
 use App\Http\Requests\Role\StoreRequest;
 use App\Http\Requests\Role\UpdateRequest;
+use App\Http\Requests\Role\DeleteRequest;
 use App\Services\Impl\RoleService;
 
 class RoleController extends BaseController
@@ -27,6 +28,11 @@ class RoleController extends BaseController
     protected function getUpdateRequest(): string
     {
         return UpdateRequest::class;
+    }
+
+    protected function getDeleteRequest(): string
+    {
+        return DeleteRequest::class;
     }
     
 }

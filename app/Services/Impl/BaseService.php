@@ -25,11 +25,11 @@ abstract class BaseService
     protected function processPayload() {
         return $this;
     }
-    public function create($request) {
+    public function save($request, mixed $id = null) {
         DB::beginTransaction();
         try {
             $payload = $this->setPayload($request)->processPayload()->buildPayload();
-            $result = $this->repository->create($payload);
+            $result = $this->repository->save($payload, $id);
             DB::commit();
             return [
                 'data' => $result,
@@ -42,5 +42,22 @@ abstract class BaseService
                 'flag' => false
             ];
         }     
+    }
+
+    public function delete(mixed $id = null) {
+        DB::beginTransaction();
+        try {
+            $this->repository->delete($id);
+            DB::commit();
+            return [
+                'flag' => true
+            ];
+        }catch(Exeption $e) {
+            DB::rollBack();
+            return [
+                'error' => $e->getMessage(),
+                'flag' => false
+            ];
+        }
     }
 }

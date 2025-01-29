@@ -23,6 +23,14 @@ class UpdateRequest extends BaseRequest
     {
         return [
             'name' => 'required',
+            'publish' => 'gt:0'
+        ];
+    }
+
+    public function messages() : array {
+        return [
+            'name.required' => 'Bạn phải nhập tên (*)',
+            'publish.gt' => 'Trường publish phải được chọn (*)',
         ];
     }
 }
