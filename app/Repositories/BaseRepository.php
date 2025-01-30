@@ -40,4 +40,17 @@ class BaseRepository
     public function save(array $payload = [], mixed $id = null) {
         return ($id) ? $this->update($payload, $id) : $this->create($payload);
     }
+
+    public function all() {
+        return $this->model->all();
+    }
+    public function paginate(array $specs = []) {
+        return $this->model
+        ->keyword($specs['keyword'] ?? [])
+        ->simpleFilter($specs['simpleFilter'] ?? [])
+        ->complexFilter($specs['complexFilter'] ?? [])
+        ->dateFilter($specs['dateFilter'] ?? [])  
+        ->orderBy($specs['sortBy'][0], $specs['sortBy'][1])
+        ->paginate($specs['perpage']);
+    }
 }

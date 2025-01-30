@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ApiResource extends JsonResource
 {
     
-    public static function success(array $data = [], string $message = '', int $code = 200) {
+    public static function success(mixed $data = null, string $message = '', int $code = 200) {
         return response()->json([
             'status' => 'success',
             'message' => $message,

@@ -12,6 +12,21 @@ class RoleService extends BaseService
         parent::__construct($roleRepository);
     }   
 
+    protected function getSearchField() : array {
+        return ['name'];
+    }
+    protected function getPerPage() : int {
+        return 20;
+    }
+    protected function getSimpleFilter() : array {
+        return ['publish'];
+    }
+    protected function getComplexFilter() : array {
+        return ['id'];
+    }
+    protected function getDateFilter() : array {
+        return ['created_at'];
+    }
     protected function requestOnlyPayload(): array
     {
         return ['name', 'publish'];

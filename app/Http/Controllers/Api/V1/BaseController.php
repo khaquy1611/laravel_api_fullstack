@@ -22,6 +22,29 @@ abstract class BaseController extends Controller
         $this->service = $service;
     }
 
+    public function all(Request $request) {
+        try {
+            $data = $this->service->getList();
+            $resource = $this->resource::collection($data);
+            return ApiResource::success($resource, 'Lấy dữ liệu danh sách thành công', Response::HTTP_OK);   
+        }catch( \Exception $e) {
+            return ApiResource::message("Error " .$e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+
+    public function index(Request $request) {
+        try {
+            $data = $this->service->paginate($request);
+            $data->through(function ($item) {
+                return new $this->resource($item);
+            });
+            return ApiResource::success($data, 'Phân trang danh sách thành công', Response::HTTP_OK); 
+        }catch( \Exception $e) {
+            return ApiResource::message("Error " .$e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+      
+    }
     private function handleRequest(string $requestAction = '') {
         $validator =  app($requestAction);
         $validator->validate($validator->rules());
