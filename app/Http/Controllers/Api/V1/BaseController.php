@@ -78,4 +78,27 @@ abstract class BaseController extends Controller
         }
         return ApiResource::error($result['error'], 'Có lỗi xảy ra trong khi xóa dữ liệu , vui lòng thử lại', Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+
+
+    public function deleteMultiple(Request $request) {
+        $result = $this->service->deleteMultiple($request);
+        if ($result['flag']) {
+            return ApiResource::message($result['deletedCount'] . ' bản ghi đã được xóa thành công', Response::HTTP_OK);
+        }
+        return ApiResource::error($result['error'],'Có lỗi xảy ra trong khi xóa dữ liệu , vui lòng thử lại', Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    public function show($id = null) {
+        try {
+            $data = $this->service->show($id);
+            if (!$data) {
+               return ApiResource::message('Không tìm thấy dữ liệu', Response::HTTP_NOT_FOUND);
+            }
+            $objectResource = new $this->resource($data);
+            return ApiResource::success($objectResource, 'Lấy dữ liệu đơn thành công', Response::HTTP_OK);        
+        }catch(Exception $e) {
+            return ApiResource::message('Error ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);  
+        }
+     
+    }
 }

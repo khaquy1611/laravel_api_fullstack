@@ -3,9 +3,10 @@
 namespace App\Services\Impl;
 use App\Services\Impl\BaseService;
 use App\Repositories\RoleRepository;
+use App\Services\Interfaces\RoleServiceInterface;
 use Illuminate\Support\Str;
 
-class RoleService extends BaseService
+class RoleService extends BaseService implements RoleServiceInterface
 {
     public function __construct(RoleRepository $roleRepository)
     {

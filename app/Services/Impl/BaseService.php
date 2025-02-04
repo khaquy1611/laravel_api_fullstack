@@ -2,8 +2,10 @@
 
 namespace App\Services\Impl;
 use Illuminate\Support\Facades\DB;
+use Exception;
+use App\Services\Interfaces\BaseServiceInterface;
 
-abstract class BaseService
+abstract class BaseService implements BaseServiceInterface
 {
     protected $repository;
     protected $payload;
@@ -18,27 +20,19 @@ abstract class BaseService
     public function __construct(mixed $repository = null) {
         $this->repository = $repository;
     }
-    private function simpleFilter($request, array $filters = []) {
-        $simplefilter = [];
+
+    private function buildFilters($request, array $filters = []) {
+        $conditions = [];
         if (count($filters)) {
             foreach($filters as $filter) {
                 if ($request->has($filter)) {
-                    $simplefilter[$filter] = $request->input($filter);
+                    $conditions[$filter] = $request->input($filter);
                 }
-            }
-        }
-        return $simplefilter;
-    }
-    private function complexFilter($request, array $complexfilters = []) {
-        $conditions = [];
-        foreach($complexfilters as $filter) {
-            if ($request->has($filter)) {
-                $conditions[$filter] = $request->input($filter);
             }
         }
         return $conditions;
     }
-
+    
     private function specifications($request) {
         return [
             'keyword' => [
@@ -47,12 +41,18 @@ abstract class BaseService
             ],
             'perpage' => ($request->input('perpage')) ? ($request->input('perpage')) : $this->getPerPage(),
             'sortBy' => ($request->input('sortBy')) ? explode(',' ,$request->input('sortBy')) : ['id', 'desc'],
-            'simpleFilter' => $this->simpleFilter($request, $this->getSimpleFilter()),
-            'complexFilter' => $this->complexFilter($request, $this->getComplexFilter()),
-            'dateFilter' => $this->complexFilter($request, $this->getDateFilter()),
+            'filters' => [
+                'simple' => $this->buildFilters($request, $this->getSimpleFilter()),
+                'complex' => $this->buildFilters($request, $this->getComplexFilter()),
+                'date' => $this->buildFilters($request, $this->getDateFilter())
+            ],
             ];
     }
 
+    public function show($id) {
+        return $this->repository->findById($id);
+    }
+    
     protected function setPayload($request) {
         $this->payload = $request->only($this->requestOnlyPayload());
         return $this;
@@ -105,5 +105,26 @@ abstract class BaseService
                 'flag' => false
             ];
         }
+    }
+
+    public function deleteMultiple($request) {
+        DB::beginTransaction();
+        try {
+            $ids = $request->input('ids');
+            if (count($ids)) {
+                $deletedCount = $this->repository->deleteWhereIn($ids);
+                DB::commit();
+                return [
+                'deletedCount' => $deletedCount,
+                'flag' => true
+            ];
+            }
+        }catch(Exeption $e) {
+            DB::rollBack();
+            return [
+                'error' => $e->getMessage(),
+                'flag' => false
+            ];
+        }  
     }
 }

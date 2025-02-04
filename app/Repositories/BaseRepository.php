@@ -24,6 +24,10 @@ class BaseRepository
     public function delete(int $modelId = 0) {
         return $this->findById($modelId)->delete();
     }
+
+    public function deleteWhereIn(array $ids = []) {
+        return $this->model->whereIn('id', $ids)->delete();
+    }
     
     public function findById(
         int $modelId,
@@ -47,9 +51,9 @@ class BaseRepository
     public function paginate(array $specs = []) {
         return $this->model
         ->keyword($specs['keyword'] ?? [])
-        ->simpleFilter($specs['simpleFilter'] ?? [])
-        ->complexFilter($specs['complexFilter'] ?? [])
-        ->dateFilter($specs['dateFilter'] ?? [])  
+        ->simpleFilter($specs['filters']['simple'] ?? [])
+        ->complexFilter($specs['filters']['complex'] ?? [])
+        ->dateFilter($specs['filters']['date'] ?? [])  
         ->orderBy($specs['sortBy'][0], $specs['sortBy'][1])
         ->paginate($specs['perpage']);
     }
