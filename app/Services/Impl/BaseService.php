@@ -75,10 +75,11 @@ abstract class BaseService implements BaseServiceInterface
         DB::beginTransaction();
         try {
             $payload = $this->setPayload($request)->processPayload()->buildPayload();
-            $result = $this->repository->save($payload, $id);
+            $model = $this->repository->save($payload, $id);
+            $this->handleManyToManyRealtion($model, $payload);
             DB::commit();
             return [
-                'data' => $result,
+                'data' => $model,
                 'flag' => true
             ];
         }catch(Exeption $e) {
@@ -126,5 +127,20 @@ abstract class BaseService implements BaseServiceInterface
                 'flag' => false
             ];
         }  
+    }
+    
+    private function handleManyToManyRealtion($model = null, $payload = []) : void {
+        $relations = $this->getManyToManyRelationShip();
+        if (count($relations)) {
+            foreach($relations as $relation) {
+                if (isset($payload[$relation])) {
+                    $model->{$relation}()->sync($payload[$relation]);
+                }
+            }
+        }
+    }
+    
+    protected function getManyToManyRelationShip() : array {
+        return [];
     }
 }

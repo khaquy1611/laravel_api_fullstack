@@ -26,7 +26,9 @@ class StoreRequest extends BaseRequest
             'password' => 'required|min:6|max:24',
             'email' => 'required|email|unique:users',
             'birthday' => 'required|date|before:today',
-            'publish' => 'gt:0'
+            'publish' => 'gt:0',
+            'roles' => 'required|array',
+            'roles.*' => 'exists:roles,id' // kiểm tra xem id roles có tồn tại trong bảng roles không
         ];
     }
     

@@ -23,8 +23,7 @@ class UpdateRequest extends BaseRequest
     {
         return [
             'name' => 'required',
-            'password' => 'required|min:6|max:24',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:users,email,' . $this->route('user') . '',
             'birthday' => 'required|date|before:today',
             'publish' => 'gt:0'
         ];
@@ -36,8 +35,6 @@ class UpdateRequest extends BaseRequest
             'email.email' => 'Định dạng email không đúng (*)',
             'email.required' => 'Bạn phải nhập email (*)',         
             'email.unique' => 'Email đã tồn tại trong hệ thống (*)',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự (*)',
-            'password.max' => 'Mật khẩu phải có tối đa 24 ký tự (*)',
             'birthday.required' => 'Bạn phải nhập ngày sinh (*)',
             'birthday.date' => 'Ngày sinh không đúng định dạng ngày tháng (*)',
             'publish.gt' => 'Trường publish phải được chọn (*)',

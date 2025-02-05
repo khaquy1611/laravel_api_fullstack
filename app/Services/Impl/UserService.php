@@ -31,7 +31,7 @@ class UserService extends BaseService implements UserServiceInterface
     }
     protected function requestOnlyPayload(): array
     {
-        return ['name', 'email', 'password', 'slug', 'birthday', 'publish'];
+        return ['name', 'email', 'password', 'slug', 'birthday', 'publish', 'roles'];
     }
     protected function processPayload() {
         return $this->generateSlug()->generateSomething();
@@ -48,5 +48,9 @@ class UserService extends BaseService implements UserServiceInterface
 
     protected function generateSomething() {
         return $this->caculateAgeFromBirthDay();
+    }
+
+    protected function getManyToManyRelationShip() : array {
+        return ['roles'];
     }
 }

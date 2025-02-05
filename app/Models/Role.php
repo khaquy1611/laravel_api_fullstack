@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Traits\Query; 
 
 class Role extends Model
@@ -14,4 +15,8 @@ class Role extends Model
         'slug',
         'publish',
     ];
+
+    public function roles() : BelongsToMany {
+        return $this->belongsToMany(User::class, 'role_user')->withTimestamps();
+    }
 }
