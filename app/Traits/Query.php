@@ -3,13 +3,14 @@ namespace App\Traits;
 
 trait Query {
     public function scopeKeyword($query, $keyword) {
-     
-       if (count($keyword)) {
-          foreach($keyword['field'] as $key => $val) {
-             $query->orWhere($val, 'LIKE', '%' . $keyword['q'] . '%');
-          }
-       }else {
-          $query->orWhere('name', 'LIKE', '%' . $keyword['q'] . '%');
+       if (!empty($keyword['q'])) {
+        if (count($keyword['search'])) {
+            foreach($keyword['field'] as $key => $val) {
+               $query->orWhere($val, 'LIKE', '%' . $keyword['q'] . '%');
+            }
+        }else {
+            $query->orWhere('name', 'LIKE', '%' . $keyword['q'] . '%');
+         }
        }
        return $query;
     }

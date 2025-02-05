@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use App\Http\Requests\BaseRequest;
 
-class AuthRequest extends BaseRequest
+class UpdateRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,19 +22,25 @@ class AuthRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
+            'name' => 'required',
             'password' => 'required|min:6|max:24',
+            'email' => 'required|email|unique:users',
+            'birthday' => 'required|date|before:today',
+            'publish' => 'gt:0'
         ];
     }
 
     public function messages() : array {
         return [
-            'email.required' => 'Bạn phải nhập email (*)',
+            'name.required' => 'Bạn phải nhập tên người dùng (*)',
             'email.email' => 'Định dạng email không đúng (*)',
-            'password.required' => 'Bạn phải nhập mật khẩu (*)',
+            'email.required' => 'Bạn phải nhập email (*)',         
+            'email.unique' => 'Email đã tồn tại trong hệ thống (*)',
             'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự (*)',
             'password.max' => 'Mật khẩu phải có tối đa 24 ký tự (*)',
+            'birthday.required' => 'Bạn phải nhập ngày sinh (*)',
+            'birthday.date' => 'Ngày sinh không đúng định dạng ngày tháng (*)',
+            'publish.gt' => 'Trường publish phải được chọn (*)',
         ];
     }
-
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\BaseController;
 use App\Http\Requests\Role\StoreRequest;
 use App\Http\Requests\Role\UpdateRequest;
 use App\Http\Requests\Role\DeleteRequest;
+use App\Http\Requests\Role\DeleteMultipleRequest;
 use App\Services\Interfaces\RoleServiceInterface as RoleService;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -16,10 +17,9 @@ use OpenApi\Annotations as OA;
  *    name="Role",
  *    description="Role API endpoints"
  * )
- * @OA\Info(
- *   title="Laravel 11 API: Ecommerce Project Documentation",
- *   version="1.0.0",
- *   description="Role API Documentation"
+ * @OA\Server(
+ *   url="http://localhost:8000/api/v1/auth/roles",
+ *   description="Local role api Server"
  * )
  * @OA\Schema(  
  *  schema="Role",
