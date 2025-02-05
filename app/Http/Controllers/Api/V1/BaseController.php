@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResource;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 abstract class BaseController extends Controller
@@ -16,6 +16,7 @@ abstract class BaseController extends Controller
     abstract protected function getStoreRequest() : string;
     abstract protected function getUpdateRequest() : string;
     abstract protected function getDeleteRequest() : string;
+    abstract protected function getDeleteMultipleRequest() : string;
     
     public function __construct($service)
     {
@@ -81,6 +82,7 @@ abstract class BaseController extends Controller
 
 
     public function deleteMultiple(Request $request) {
+        $this->handleRequest($this->getDeleteMultipleRequest());
         $result = $this->service->deleteMultiple($request);
         if ($result['flag']) {
             return ApiResource::message($result['deletedCount'] . ' bản ghi đã được xóa thành công', Response::HTTP_OK);

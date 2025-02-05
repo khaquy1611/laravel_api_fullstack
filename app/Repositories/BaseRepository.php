@@ -30,7 +30,7 @@ class BaseRepository
     }
     
     public function findById(
-        int $modelId,
+        mixed $modelId = null,
         array $column = ['*'],
         array $relation = [],
     ){
