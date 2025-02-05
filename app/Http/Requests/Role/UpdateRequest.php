@@ -23,7 +23,9 @@ class UpdateRequest extends BaseRequest
     {
         return [
             'name' => 'required',
-            'publish' => 'gt:0'
+            'publish' => 'gt:0',
+            'permisions' => 'required|array',
+            'permisions.*' => 'exists:permisions,id' // kiểm tra xem id permisions có tồn tại trong bảng permisions không
         ];
     }
 

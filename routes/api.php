@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\PermissionController;
 
 
 
@@ -34,4 +35,12 @@ Route::prefix('v1/auth')->middleware(['jwt'])->group(function () {
         Route::delete('delete-multitple', [UserController::class, 'deleteMultiple']);
     });
     Route::resource('users', UserController::class)->except(['create', 'edit']);
+    /*------------------*/
+    /* PERMISSION ROUTES */
+    Route::group(['prefix' => 'permissions'], function () {
+        Route::get('all', [PermissionController::class, 'all']);
+        Route::delete('delete-multitple', [PermissionController::class, 'deleteMultiple']);
+        Route::post('create-module-permission', [PermissionController::class, 'createModulePermission']);
+    });
+    Route::resource('permissions', PermissionController::class)->except(['create', 'edit']);
 });

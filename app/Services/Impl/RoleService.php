@@ -30,7 +30,7 @@ class RoleService extends BaseService implements RoleServiceInterface
     }
     protected function requestOnlyPayload(): array
     {
-        return ['name', 'publish'];
+        return ['name', 'publish', 'permisions'];
     }
     protected function processPayload() {
         return $this->generateSlug()->generateSomething();
@@ -43,4 +43,9 @@ class RoleService extends BaseService implements RoleServiceInterface
     protected function generateSomething() {
         return $this;
     }
+
+    protected function getManyToManyRelationShip() : array {
+        return ['permisions'];
+    }
+
 }

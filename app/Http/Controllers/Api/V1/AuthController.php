@@ -60,7 +60,7 @@ class AuthController extends Controller
     {
         return [
             'access_token' => $token,
-            'refresh_token' => $refreshTokenPayload['refresh_token'],
+            'refresh_token' => $refreshTokenPayload ?? $refreshTokenPayload['refresh_token'],
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
         ];
@@ -74,25 +74,31 @@ class AuthController extends Controller
     public function refresh(RefreshTokenRequest $request) {
         $refreshToken = $this->refreshTokenRepository->findRefreshTokenValid($request->input('refresh_token'));
         $user = $this->userRepository->findById($refreshToken->user_id);
+        if (!$refreshToken) {
+            return ApiResource::message('Refresh token không hợp lệ hoặc đã hết hạn', Response::HTTP_UNAUTHORIZED);
+        }
         if (!$user) {
             return ApiResource::message('Không tìm thấy người dùng', Response::HTTP_NOT_FOUND);
         }
         // token truy cập cũ không còn hiệu lực
-        try {
-            auth('api')->invalidate(true);
-        }catch(TokenExpiredException $e) {
-            
-        }catch(TokenInvalidException $e) {
-            return responApiResource::message('Token không hợp lệ', Response::HTTP_UNAUTHORIZED);
-        }catch (JWTException $e) {
-            return ApiResource::message('Token không tìm thấy', Response::HTTP_UNAUTHORIZED);
+        if (auth('api')->getToken()) {
+            try {
+                auth('api')->invalidate(true);
+            }catch(TokenExpiredException $e) {
+                
+            }catch(TokenInvalidException $e) {
+                return responApiResource::message('Token không hợp lệ', Response::HTTP_UNAUTHORIZED);
+            }catch (JWTException $e) {
+                return ApiResource::message('Token không tìm thấy', Response::HTTP_UNAUTHORIZED);
+            }
         }
+        
         
         // tạp ra access token mới
         auth('api')->setTTL(60*24);
         $token = auth('api')->login($user);
         if ($token) {
-            return ApiResource::success($this->respondWithToken($token, $refreshToken['refresh_token']), 'Lấy token mới thành công', Response::HTTP_OK);
+            return ApiResource::success($this->respondWithToken($token, $refreshToken['refresh_token'] ?? $refreshToken) , 'Lấy token mới thành công', Response::HTTP_OK);
         }
         return ApiResource::message('NetWork Error', Response::HTTP_INTERNAL_SERVER_ERROR);
     }

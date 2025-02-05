@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Role;
+namespace App\Http\Requests\Permission;
 
 use App\Http\Requests\BaseRequest;
 
@@ -22,17 +22,16 @@ class StoreRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
+            'name' => 'required|regex:/^[a-z]+:[a-zA-Z]+$/|unique:permisions',
             'publish' => 'gt:0',
-            'permisions' => 'required|array',
-            'permisions.*' => 'exists:permisions,id' // kiểm tra xem id permisions có tồn tại trong bảng permisions không
+            
         ];
     }
-    
     public function messages() : array {
         return [
-            'name.required' => 'Bạn phải nhập tên (*)',
+            'name.required' => 'Bạn phải nhập tên người dùng (*)',
             'publish.gt' => 'Trường publish phải được chọn (*)',
+            
         ];
     }
 }

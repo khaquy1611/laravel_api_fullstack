@@ -57,4 +57,8 @@ class BaseRepository
         ->orderBy($specs['sortBy'][0], $specs['sortBy'][1])
         ->paginate($specs['perpage']);
     }
+
+    public function checkExists(string $field = '' , mixed $value = null) {
+        return $this->model->where( $field, $value)->exists();
+    }
 }
