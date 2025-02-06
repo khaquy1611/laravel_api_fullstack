@@ -4,12 +4,13 @@ namespace App\Services\Impl;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Services\Interfaces\BaseServiceInterface;
+use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class BaseService implements BaseServiceInterface
 {
     protected $repository;
     protected $payload;
-    
+
     abstract protected function requestOnlyPayload(): array;
     abstract protected function getSearchField(): array;
     abstract protected function getPerPage(): int;
@@ -46,6 +47,10 @@ abstract class BaseService implements BaseServiceInterface
                 'complex' => $this->buildFilters($request, $this->getComplexFilter()),
                 'date' => $this->buildFilters($request, $this->getDateFilter())
             ],
+            'scope' => [
+                'view' => $request->input('viewScope'),
+                'action' => $request->input('actionScope')
+            ]
             ];
     }
 
@@ -64,17 +69,20 @@ abstract class BaseService implements BaseServiceInterface
     protected function processPayload() {
         return $this;
     }
-    public function paginate($request) {
+    public function paginate($request, $recordType = 'paginate') {
         $specifications = $this->specifications($request);
-        return $this->repository->paginate($specifications);
+        return $this->repository->paginate($specifications, $recordType);
     }
-    public function getList() {
-        return $this->repository->all();
-    }
-    public function save($request, mixed $id = null) {
+
+    public function save($request, mixed $id = null, $method = 'create') {
         DB::beginTransaction();
         try {
-            $payload = $this->setPayload($request)->processPayload()->buildPayload();
+            if ($method == 'update') {
+                $this->validatePermission($request, $id);
+            }
+            $payload = $this->setPayload($request)
+                            ->processPayload()
+                            ->buildPayload();
             $model = $this->repository->save($payload, $id);
             $this->handleManyToManyRealtion($model, $payload);
             DB::commit();
@@ -82,7 +90,12 @@ abstract class BaseService implements BaseServiceInterface
                 'data' => $model,
                 'flag' => true
             ];
-        }catch(Exeption $e) {
+        }
+        catch(AuthorizationException $e) {
+            DB::rollBack();
+            throw $e;
+        } 
+        catch(Exeption $e) {
             DB::rollBack();
             return [
                 'error' => $e->getMessage(),
@@ -94,6 +107,7 @@ abstract class BaseService implements BaseServiceInterface
     public function delete(mixed $id = null) {
         DB::beginTransaction();
         try {
+            $this->validatePermission($request, $id);
             $this->repository->delete($id);
             DB::commit();
             return [
@@ -140,6 +154,15 @@ abstract class BaseService implements BaseServiceInterface
         }
     }
     
+    private function validatePermission($request, $id) {
+        $action = $request->input('actionScope') === 'all';
+        if (!$action) {
+            $model = $this->repository->findById($id);
+            if (isset($model->user_id) && $model->user_id !== auth('api')->user()->id) {
+                throw new AuthorizationException('Permission Denined');
+            } 
+        }
+    }
     protected function getManyToManyRelationShip() : array {
         return [];
     }

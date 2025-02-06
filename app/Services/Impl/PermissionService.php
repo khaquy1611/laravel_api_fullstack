@@ -13,10 +13,16 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
 {
     protected $permissionRepository;
     protected $payload;
+    private $auth;
+    
     public function __construct(PermissionRepository $permissionRepository)
     {
         parent::__construct($permissionRepository);
         $this->permissionRepository = $permissionRepository;
+        /** 
+         * @var \Tymon\JWTAuth\JWTGuard
+         */
+        $this->auth = auth('api');
     }   
 
     protected function getSearchField() : array {
@@ -36,11 +42,17 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     }
     protected function requestOnlyPayload(): array
     {
-        return ['name', 'publish'];
+        return ['name', 'publish', 'user_id'];
     }
     protected function processPayload() {
+        return $this->setUserId();
+    }
+    
+    protected function setUserId() {
+        $this->payload['user_id'] = $this->auth->user()->id;
         return $this;
     }
+    
     public function createModulePermission($request) {
         DB::beginTransaction();
         try {

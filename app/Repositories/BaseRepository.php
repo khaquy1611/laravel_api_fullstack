@@ -48,14 +48,19 @@ class BaseRepository
     public function all() {
         return $this->model->all();
     }
-    public function paginate(array $specs = []) {
+    public function paginate(array $specs = [], string $recordType = 'paginate') {
         return $this->model
         ->keyword($specs['keyword'] ?? [])
         ->simpleFilter($specs['filters']['simple'] ?? [])
         ->complexFilter($specs['filters']['complex'] ?? [])
         ->dateFilter($specs['filters']['date'] ?? [])  
+        ->permissionFilter($specs['scope'] ?? [])
         ->orderBy($specs['sortBy'][0], $specs['sortBy'][1])
-        ->paginate($specs['perpage']);
+        ->when(
+            $recordType == 'paginate' , 
+            fn($q) => $q->paginate($specs['perpage']),
+            fn($q) => $q->get(),
+        );
     }
 
     public function checkExists(string $field = '' , mixed $value = null) {

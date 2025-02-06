@@ -85,4 +85,12 @@ trait Query {
         }
         return $query;
     }
+
+    public function scopePermissionFilter($query, $permission) {
+        $auth = auth('api')->user();
+        if(isset($permission['view']) && $permission['view'] = 'own') {
+            $query->where('user_id', $auth->id);
+        }
+        return $query;
+    }
 }

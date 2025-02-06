@@ -44,7 +44,12 @@ class CheckPermission
         if (!in_array($permissionName, $permissions)) {
             return ApiResource::message('Permission denined', Response::HTTP_FORBIDDEN);
         }
-     
+
+        $mergeRequest = [
+            'viewScope' => in_array("{$method}:viewAll", $permissions) ? 'all' : 'own',
+            'actionScope' => in_array("{$method}:actionAll", $permissions) ? 'all' : 'own'
+        ];
+        $request->merge($mergeRequest);
         return $next($request);
     }
 }

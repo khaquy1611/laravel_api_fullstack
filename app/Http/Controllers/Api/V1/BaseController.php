@@ -7,6 +7,7 @@ use App\Http\Resources\ApiResource;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class BaseController extends Controller
 {
@@ -25,7 +26,7 @@ abstract class BaseController extends Controller
 
     public function all(Request $request) {
         try {
-            $data = $this->service->getList();
+            $data = $this->service->paginate($request, 'list');
             $resource = $this->resource::collection($data);
             return ApiResource::success($resource, 'Lấy dữ liệu danh sách thành công', Response::HTTP_OK);   
         }catch( \Exception $e) {
@@ -62,13 +63,19 @@ abstract class BaseController extends Controller
     }
 
     public function update(Request $request, mixed $id = null) {
-        $this->handleRequest($this->getUpdateRequest());
-        $result = $this->service->save($request, $id);
-        if ($result['flag']) {
+        try {
+            $this->handleRequest($this->getUpdateRequest());
+            $result = $this->service->save($request, $id);
+            if ($result['flag']) {
             $objectResource = new $this->resource($result['data'])->toArray($request);
             return ApiResource::success($objectResource, 'Cập nhập dữ liệu thành công', Response::HTTP_OK);
+            }
+        }catch(AuthorizationException $e) {
+            return ApiResource::message($e->getMessage(), Response::HTTP_FORBIDDEN);
         }
-        return ApiResource::error($result['error'], 'Có lỗi xảy ra trong khi cập nhập dữ liệu , vui lòng cập nhập lại', Response::HTTP_INTERNAL_SERVER_ERROR);
+        catch(\Exception $e) {
+            return ApiResource::error($result['error'], 'Có lỗi xảy ra trong khi cập nhập dữ liệu , vui lòng cập nhập lại', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function destroy(mixed $id = null) {
