@@ -22,6 +22,7 @@ class UpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'id' => 'required|exists:users,id',
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $this->route('user') . '',
             'birthday' => 'required|date|before:today',
@@ -41,5 +42,11 @@ class UpdateRequest extends BaseRequest
             'birthday.date' => 'Ngày sinh không đúng định dạng ngày tháng (*)',
             'publish.gt' => 'Trường publish phải được chọn (*)',
         ];
+    }
+
+    protected function prepareForValidation() {
+        $this->merge([
+            'id' => $this->route('user')
+        ]);
     }
 }

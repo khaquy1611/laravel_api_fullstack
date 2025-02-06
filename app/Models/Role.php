@@ -16,7 +16,7 @@ class Role extends Model
         'publish',
     ];
 
-    public function roles() : BelongsToMany {
+    public function users() : BelongsToMany {
         return $this->belongsToMany(User::class, 'role_user')->withTimestamps();
     }
 

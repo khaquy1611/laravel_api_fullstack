@@ -22,6 +22,7 @@ class UpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'id' => 'required|exists:roles,id',
             'name' => 'required',
             'publish' => 'gt:0',
             'permisions' => 'required|array',
@@ -34,5 +35,11 @@ class UpdateRequest extends BaseRequest
             'name.required' => 'Bạn phải nhập tên (*)',
             'publish.gt' => 'Trường publish phải được chọn (*)',
         ];
+    }
+
+    protected function prepareForValidation() {
+        $this->merge([
+            'id' => $this->route('role')
+        ]);
     }
 }

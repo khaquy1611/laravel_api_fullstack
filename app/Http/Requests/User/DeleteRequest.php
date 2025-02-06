@@ -29,17 +29,12 @@ class DeleteRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'id' => 'required|exists:users,id',
         ];
     }
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            $userId = $this->route('user');
-            $user = $this->userRepository->findById($userId);
-            if (!$user || !$userId) {
-                $validator->errors()->add('user', 'Người dùng không tồn tại.');
-            }
-        });
-        
+    protected function prepareForValidation() {
+        $this->merge([
+            'id' => $this->route('user')
+        ]);
     }
 }

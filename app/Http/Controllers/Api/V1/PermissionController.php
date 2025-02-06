@@ -8,6 +8,7 @@ use App\Http\Requests\Permission\StoreRequest;
 use App\Http\Requests\Permission\UpdateRequest;
 use App\Http\Requests\Permission\DeleteRequest;
 use App\Http\Requests\Permission\DeleteMultipleRequest;
+use App\Http\Requests\Permission\CreatModulePermissionRequest;
 use App\Services\Interfaces\PermissionServiceInterface as PermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -311,7 +312,7 @@ class PermissionController extends BaseController
         return DeleteMultipleRequest::class;
     }
     
-    public function createModulePermission(Request $request) {
+    public function createModulePermission(CreatModulePermissionRequest $request) {
         $result = $this->permissionService->createModulePermission($request);
         if ($result['flag']) {
             $permission = PermissionResource::collection($result['permissions']);

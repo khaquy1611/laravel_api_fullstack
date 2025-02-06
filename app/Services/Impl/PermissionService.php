@@ -45,7 +45,7 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
         DB::beginTransaction();
         try {
             $model = $request->input('model');
-            $methods = ['all', 'paginate', 'store', 'update', 'delete', 'deleteMutiple', 'show'];
+            $methods = ['all', 'index', 'store', 'update', 'destroy', 'deleteMultiple', 'show'];
             $permissions = [];
             foreach($methods as $action) {
             $payload = ['name' => "{$model}:{$action}", 'publish' => $request->input('publish')];

@@ -35,4 +35,10 @@ class StoreRequest extends BaseRequest
             'publish.gt' => 'Trường publish phải được chọn (*)',
         ];
     }
+
+    protected function prepareForValidation() {
+        $this->merge([
+            'id' => $this->route('role')
+        ]);
+    }
 }

@@ -22,6 +22,7 @@ class AuthController extends Controller
     private $refreshTokenService;
     private $refreshTokenRepository;
     private $userRepository;
+    private $auth;
     public function __construct(
         RefreshTokenService $refreshTokenService, 
         RefreshTokenRepository $refreshTokenRepository, 
@@ -30,6 +31,10 @@ class AuthController extends Controller
         $this->refreshTokenService = $refreshTokenService;
         $this->refreshTokenRepository = $refreshTokenRepository;
         $this->userRepository = $userRepository;
+        /** 
+         * @var \Tymon\JWTAuth\JWTGuard
+         */
+        $this->auth = auth('api');
     }
     
     public function authenticate(AuthRequest $request)
@@ -38,19 +43,19 @@ class AuthController extends Controller
             'email' => $request->string('email'),
             'password' => $request->string('password')
         ];
-        auth('api')->setTTL(2);
-        if (! $token = auth('api')->attempt($credentials)) {    
+        $this->auth->setTTL(2);
+        if (! $token = $this->auth->attempt($credentials)) {    
             return ApiResource::message('Đăng nhập thất bại', Response::HTTP_UNAUTHORIZED);
         }
         // Tạo bảng refresh token
         // Tạo ra refresh token
         $refreshTokenPayload = [
             'refresh_token' => Str::uuid(),
-            'user_id' => auth('api')->user()->id,
+            'user_id' => $this->auth->user()->id,
             'expires_at' => now()->addDays()
         ];
         if ($this->refreshTokenService->create($refreshTokenPayload)) {
-            return ApiResource::success($this->respondWithToken($token, $refreshTokenPayload), 'Tạo RefreshToken thành công' , Response::HTTP_OK);
+            return ApiResource::success($this->respondWithToken($token, $refreshTokenPayload), 'Tạo Access Token thành công' , Response::HTTP_OK);
         }
         return ApiResource::message('Đăng nhập thất bại', Response::HTTP_UNAUTHORIZED);
     }
@@ -62,12 +67,12 @@ class AuthController extends Controller
             'access_token' => $token,
             'refresh_token' => $refreshTokenPayload ?? $refreshTokenPayload['refresh_token'],
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'expires_in' => $this->auth->factory()->getTTL() * 60
         ];
     }
 
     public function me() {
-        $auth = auth('api')->user();
+        $auth = $this->auth->user();
         return ApiResource::success(['user' => $auth], 'Lấy thông tin người dùng thành công', Response::HTTP_OK);
     }
 
@@ -81,9 +86,9 @@ class AuthController extends Controller
             return ApiResource::message('Không tìm thấy người dùng', Response::HTTP_NOT_FOUND);
         }
         // token truy cập cũ không còn hiệu lực
-        if (auth('api')->getToken()) {
+        if ($this->auth->getToken()) {
             try {
-                auth('api')->invalidate(true);
+                $this->auth->invalidate(true);
             }catch(TokenExpiredException $e) {
                 
             }catch(TokenInvalidException $e) {
@@ -95,8 +100,8 @@ class AuthController extends Controller
         
         
         // tạp ra access token mới
-        auth('api')->setTTL(60*24);
-        $token = auth('api')->login($user);
+        $this->auth->setTTL(60*24);
+        $token = $this->auth->login($user);
         if ($token) {
             return ApiResource::success($this->respondWithToken($token, $refreshToken['refresh_token'] ?? $refreshToken) , 'Lấy token mới thành công', Response::HTTP_OK);
         }
@@ -105,10 +110,10 @@ class AuthController extends Controller
 
     public function logout() {
         try {
-            $user = auth('api')->user();
+            $user = $this->auth->user();
             $this->refreshTokenRepository->deleteTokenByUserId($user->id);
-            auth('api')->invalidate(true);
-            auth('api')->logout();
+            $this->auth->invalidate(true);
+            $this->auth->logout();
             return ApiResource::message('Đăng xuất thành công', Response::HTTP_OK);
         
         }catch (Exception $e) {

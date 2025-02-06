@@ -1,21 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Role;
+namespace App\Http\Requests\Permission;
 
 use App\Http\Requests\BaseRequest;
-use App\Repositories\RoleRepository;
 
-class DeleteRequest extends BaseRequest
+class CreatModulePermissionRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    private $roleRepository;
-    public function __construct() {
-        $this->roleRepository = app(RoleRepository::class);
-    }
-
-    
     public function authorize(): bool
     {
         return true;
@@ -25,16 +18,17 @@ class DeleteRequest extends BaseRequest
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */ 
+     */
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:roles,id',
+            'model' => 'required',
+            
         ];
     }
-    protected function prepareForValidation() {
-        $this->merge([
-            'id' => $this->route('role')
-        ]);
+    public function messages() : array {
+        return [
+            'name.required' => 'Bạn phải nhập tên model (*)',
+        ];
     }
 }

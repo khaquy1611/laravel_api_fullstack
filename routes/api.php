@@ -21,7 +21,7 @@ Route::group(['prefix' => 'v1/auth'], function ($router) {
    
 });
 
-Route::prefix('v1/auth')->middleware(['jwt'])->group(function () {
+Route::prefix('v1/auth')->middleware(['jwt', 'check-permission'])->group(function () {
     /* ROLE ROUTES */
     Route::group(['prefix' => 'roles'], function () {
         Route::get('all', [RoleController::class, 'all']);
