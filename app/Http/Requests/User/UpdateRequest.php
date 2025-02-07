@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\User;
 
-use App\Http\Requests\BaseRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequest extends BaseRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,8 +27,7 @@ class UpdateRequest extends BaseRequest
             'email' => 'required|email|unique:users,email,' . $this->route('user') . '',
             'birthday' => 'required|date|before:today',
             'publish' => 'gt:0',
-            'roles' => 'required|array',
-            'roles.*' => 'exists:roles,id' // kiểm tra xem id roles có tồn tại trong bảng roles không
+            'image' => 'required|file|mimes:jpeg,jpg,png,webp,gif|max:5120' 
         ];
     }
 

@@ -66,7 +66,7 @@ abstract class BaseService implements BaseServiceInterface
     protected function buildPayload() {
         return $this->payload;
     }
-    protected function processPayload() {
+    protected function processPayload($request) {
         return $this;
     }
     public function paginate($request, $recordType = 'paginate') {
@@ -81,7 +81,7 @@ abstract class BaseService implements BaseServiceInterface
                 $this->validatePermission($request, $id);
             }
             $payload = $this->setPayload($request)
-                            ->processPayload()
+                            ->processPayload($request)
                             ->buildPayload();
             $model = $this->repository->save($payload, $id);
             $this->handleManyToManyRealtion($model, $payload);
@@ -148,7 +148,11 @@ abstract class BaseService implements BaseServiceInterface
         if (count($relations)) {
             foreach($relations as $relation) {
                 if (isset($payload[$relation])) {
-                    $model->{$relation}()->sync($payload[$relation]);
+                    $relationData = $payload[$relation];
+                    if (is_string($relationData)) {
+                        $relationData = json_decode($relationData);
+                    }
+                    $model->{$relation}()->sync($relationData);
                 }
             }
         }

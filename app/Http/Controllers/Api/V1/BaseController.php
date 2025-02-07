@@ -47,13 +47,13 @@ abstract class BaseController extends Controller
         }
       
     }
-    private function handleRequest(string $requestAction = '') {
+    private function handleRequest(string $requestAction = '', $request) {
         $validator =  app($requestAction);
         $validator->validate($validator->rules());
     }
 
     public function store(Request $request) {
-        $this->handleRequest($this->getStoreRequest());
+        $this->handleRequest($this->getStoreRequest(),$request);
         $result = $this->service->save($request);
         if ($result['flag']) {
         $objectResource = new $this->resource($result['data'])->toArray($request);
@@ -64,7 +64,7 @@ abstract class BaseController extends Controller
 
     public function update(Request $request, mixed $id = null) {
         try {
-            $this->handleRequest($this->getUpdateRequest());
+            $this->handleRequest($this->getUpdateRequest(), $request);
             $result = $this->service->save($request, $id);
             if ($result['flag']) {
             $objectResource = new $this->resource($result['data'])->toArray($request);
@@ -74,12 +74,12 @@ abstract class BaseController extends Controller
             return ApiResource::message($e->getMessage(), Response::HTTP_FORBIDDEN);
         }
         catch(\Exception $e) {
-            return ApiResource::error($result['error'], 'Có lỗi xảy ra trong khi cập nhập dữ liệu , vui lòng cập nhập lại', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResource::message($e->getMessage() , Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     public function destroy(mixed $id = null) {
-        $this->handleRequest($this->getDeleteRequest());
+        $this->handleRequest($this->getDeleteRequest(), $request);
         $result = $this->service->delete($id);
         if ($result['flag']) {
             return ApiResource::message('Xóa dữ liệu thành công', Response::HTTP_OK);
@@ -89,7 +89,7 @@ abstract class BaseController extends Controller
 
 
     public function deleteMultiple(Request $request) {
-        $this->handleRequest($this->getDeleteMultipleRequest());
+        $this->handleRequest($this->getDeleteMultipleRequest(), $request);
         $result = $this->service->deleteMultiple($request);
         if ($result['flag']) {
             return ApiResource::message($result['deletedCount'] . ' bản ghi đã được xóa thành công', Response::HTTP_OK);

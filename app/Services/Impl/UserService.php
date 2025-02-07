@@ -6,12 +6,21 @@ use App\Repositories\UserRepository;
 use App\Services\Interfaces\UserServiceInterface;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Services\Impl\ImageUploadService;
 
 class UserService extends BaseService implements UserServiceInterface
 {
-    public function __construct(UserRepository $userRepository)
+    protected $userRepository;
+    protected $payload;
+    protected $imageUploadService;
+    
+    public function __construct(
+        UserRepository $userRepository,
+        ImageUploadService $imageUploadService
+    )
     {
         parent::__construct($userRepository);
+        $this->imageUploadService = $imageUploadService;
     }   
 
     protected function getSearchField() : array {
@@ -33,8 +42,8 @@ class UserService extends BaseService implements UserServiceInterface
     {
         return ['name', 'email', 'password', 'slug', 'birthday', 'publish', 'roles'];
     }
-    protected function processPayload() {
-        return $this->generateSlug()->generateSomething();
+    protected function processPayload($request) {
+        return $this->generateSlug()->uploadAvatar($request);
     }
     protected function generateSlug() {
         $this->payload['slug'] = Str::slug($this->payload['name']);
@@ -49,7 +58,21 @@ class UserService extends BaseService implements UserServiceInterface
     protected function generateSomething() {
         return $this->caculateAgeFromBirthDay();
     }
-
+    protected function uploadAvatar($request) {
+        $arguments = [
+            'files' => $request->file('image'),
+            'folder' => 'avatar',
+            'pipelineKey' => 'default',
+            'overrideOptions' => [
+                'optimize' => [
+                    'quality' => 80
+                ],
+            ]
+        ];
+        $processImage = $this->imageUploadService->upload(...$arguments);
+        $this->payload['avatar'] = $processImage['files']['path'];
+        return $this;
+    }
     protected function getManyToManyRelationShip() : array {
         return ['roles'];
     }
